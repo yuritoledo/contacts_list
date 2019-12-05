@@ -43,6 +43,70 @@ class ContactHelper {
       ''');
     });
   }
+
+  Future<Contact> saveContact(Contact contact) async {
+    final contactDb = await db;
+    contact.id = await contactDb.insert(contactTable, contact.toMap());
+    return contact;
+  }
+
+  Future<Contact> getContact(int id) async {
+    final contactDb = await db;
+    final List<Map> contacts = await contactDb.query(contactTable,
+        columns: [idColumn, nameColumn, emailColumn, phoneColumn, imgColumn],
+        where: '$idColumn = ?',
+        whereArgs: [id]);
+
+    if (contacts.isNotEmpty) {
+      return Contact.fromMap(contacts.first);
+    } else {
+      return null;
+    }
+  }
+
+  Future<bool> deleteContact(int id) async {
+    final contactDb = await db;
+    final amountDeleted = await contactDb
+        .delete(contactTable, where: '$idColumn = ? ', whereArgs: [id]);
+    if (amountDeleted > 0) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  Future<bool> updateContact(Contact contact) async {
+    final contactDb = await db;
+    final amount = await contactDb.update(contactTable, contact.toMap(),
+        where: '$idColumn  = ? ', whereArgs: [contact.id]);
+    if (amount > 0) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  Future<List<Contact>> getAllContacts() async {
+    final contactDb = await db;
+    final List maps = await contactDb.query(contactTable);
+
+    if (maps.isEmpty) return null;
+
+    final contacts = maps.map((m) => Contact.fromMap(m));
+    return contacts.toList();
+  }
+
+  Future<int> getNumber() async {
+    final contactDb = await db;
+    final amount = Sqflite.firstIntValue(
+        await contactDb.rawQuery('SELECT COUNT(*) from $contactTable'));
+    return amount;
+  }
+
+  Future close() async {
+    final contactDb = await db;
+    contactDb.close();
+  }
 }
 
 class Contact {
@@ -51,6 +115,8 @@ class Contact {
   String email;
   String phone;
   String img;
+
+  Contact({this.name, this.email, this.phone, this.img});
 
   Contact.fromMap(Map map) {
     id = map[idColumn];
