@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:contacts_list/helpers/contact.dart';
 import 'package:flutter/material.dart';
 
@@ -49,14 +51,14 @@ class _HomeState extends State<Home> {
       child: Row(
         children: <Widget>[
           Container(
-            width: 80,
-            height: 80,
+            width: 80.0,
+            height: 80.0,
             decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 image: DecorationImage(
-                    image: NetworkImage(
-                  'https://image.shutterstock.com/image-vector/male-profile-picture-placeholder-vector-260nw-450966901.jpg',
-                ))),
+                    image: item.img != null
+                        ? FileImage(File(item.img))
+                        : AssetImage('images/avatar.png'))),
           ),
           Padding(
             padding: const EdgeInsets.only(left: 10),
