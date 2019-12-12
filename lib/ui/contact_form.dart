@@ -34,14 +34,14 @@ class _ContactFormState extends State<ContactForm> {
     }
   }
 
-  Future<void> _saveContact() async {
+  void _saveContact() {
     final contact = Contact(
-      name: _nameCtrl.text,
-      email: _emailCtrl.text,
-      phone: _phoneCtrl.text,
-    );
-    final c = await ContactHelper().saveContact(contact);
-    print(c);
+        name: _nameCtrl.text,
+        email: _emailCtrl.text,
+        phone: _phoneCtrl.text,
+        id: widget.contact.id);
+
+    Navigator.pop(context, contact);
   }
 
   @override

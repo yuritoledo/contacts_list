@@ -36,10 +36,10 @@ class _HomeState extends State<Home> {
                 )));
 
     if (callbackContact != null) {
-      if (contact != null) {
-        await helper.updateContact(contact);
-      } else {
+      if (contact == null) {
         await helper.saveContact(callbackContact);
+      } else {
+        await helper.updateContact(callbackContact);
       }
       _getAllContacts();
     }
