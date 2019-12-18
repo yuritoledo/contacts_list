@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:contacts_list/helpers/contact.dart';
 import 'package:contacts_list/ui/contact_form.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -28,7 +29,7 @@ class _HomeState extends State<Home> {
   }
 
   Future _showContact({Contact contact}) async {
-    final callbackContact = await Navigator.push(
+    final Contact callbackContact = await Navigator.push(
         context,
         MaterialPageRoute(
             builder: (context) => ContactForm(
@@ -39,6 +40,7 @@ class _HomeState extends State<Home> {
       if (contact == null) {
         await helper.saveContact(callbackContact);
       } else {
+        callbackContact.id = contact.id;
         await helper.updateContact(callbackContact);
       }
       _getAllContacts();
@@ -67,7 +69,7 @@ class _HomeState extends State<Home> {
 
   Widget _buildCard(Contact contact) {
     return GestureDetector(
-      onTap: () => _showContact(contact: contact),
+      onTap: () => _buildBottomModal(contact),
       child: Padding(
         padding: EdgeInsets.all(10.0),
         child: Row(
@@ -106,5 +108,72 @@ class _HomeState extends State<Home> {
         ),
       ),
     );
+  }
+
+  void _buildBottomModal(Contact contact) {
+    showModalBottomSheet(
+        context: context,
+        builder: (context) {
+          return BottomSheet(
+            onClosing: () {},
+            builder: (context) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  FlatButton(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Padding(
+                          padding: EdgeInsets.only(right: 10),
+                          child: Icon(Icons.phone),
+                        ),
+                        Text('Ligar'),
+                      ],
+                    ),
+                    onPressed: () {
+                      launch('tel:${contact.phone}');
+                      Navigator.pop(context);
+                    },
+                  ),
+                  FlatButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      _showContact(contact: contact);
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Padding(
+                          padding: EdgeInsets.only(right: 10),
+                          child: Icon(Icons.edit),
+                        ),
+                        Text('Editar')
+                      ],
+                    ),
+                  ),
+                  FlatButton(
+                    onPressed: () {
+                      helper.deleteContact(contact.id);
+                      setState(
+                          () => list.removeWhere((c) => c.id == contact.id));
+                      Navigator.pop(context);
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Padding(
+                          padding: EdgeInsets.only(right: 10),
+                          child: Icon(Icons.delete),
+                        ),
+                        Text('Excluir')
+                      ],
+                    ),
+                  ),
+                ],
+              );
+            },
+          );
+        });
   }
 }

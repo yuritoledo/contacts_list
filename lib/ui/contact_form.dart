@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:contacts_list/helpers/contact.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ContactForm extends StatefulWidget {
   final Contact contact;
@@ -31,16 +32,15 @@ class _ContactFormState extends State<ContactForm> {
       _emailCtrl.text = contact.email;
       _phoneCtrl.text = contact.phone;
     } else {
-      contact = Contact();
+      setState(() {
+        contact = Contact();
+      });
     }
   }
 
   void _saveContact() {
     final contact = Contact(
-        name: _nameCtrl.text,
-        email: _emailCtrl.text,
-        phone: _phoneCtrl.text,
-        id: widget.contact.id);
+        name: _nameCtrl.text, email: _emailCtrl.text, phone: _phoneCtrl.text);
 
     Navigator.pop(context, contact);
   }
@@ -96,10 +96,23 @@ class _ContactFormState extends State<ContactForm> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-              Image(
+              GestureDetector(
+                onTap: () async {
+                  final image =
+                      await ImagePicker.pickImage(source: ImageSource.camera);
+
+                  if (image == null) return;
+
+                  setState(() {
+                    contact.img = image.path;
+                  });
+                },
+                child: Image(
                   image: contact.img == null
                       ? AssetImage('images/avatar.png')
-                      : FileImage(File(contact.img))),
+                      : FileImage(File(contact.img)),
+                ),
+              ),
               Padding(
                 padding: EdgeInsets.all(8.0),
                 child: TextField(
