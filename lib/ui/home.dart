@@ -5,6 +5,8 @@ import 'package:contacts_list/ui/contact_form.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+enum Sort { asc, desc }
+
 class Home extends StatefulWidget {
   @override
   _HomeState createState() => _HomeState();
@@ -12,7 +14,7 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   final helper = ContactHelper();
-  List<Contact> list = [];
+  List<Contact> _list = [];
 
   @override
   void initState() {
@@ -24,7 +26,7 @@ class _HomeState extends State<Home> {
     final allContacts = await helper.getAllContacts();
 
     if (allContacts != null) {
-      setState(() => list = allContacts);
+      setState(() => _list = allContacts);
     }
   }
 
@@ -47,6 +49,21 @@ class _HomeState extends State<Home> {
     }
   }
 
+  void _onSelectedMenu(Sort option) {
+    switch (option) {
+      case Sort.asc:
+        _list.sort(
+            (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+        break;
+      case Sort.desc:
+        _list.sort(
+            (a, b) => b.name.toLowerCase().compareTo(a.name.toLowerCase()));
+        break;
+      default:
+    }
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -54,6 +71,22 @@ class _HomeState extends State<Home> {
         title: Text('Lista de contatos'),
         backgroundColor: Colors.red,
         centerTitle: true,
+        actions: <Widget>[
+          PopupMenuButton<Sort>(
+              onSelected: _onSelectedMenu,
+              itemBuilder: (context) {
+                return <PopupMenuEntry<Sort>>[
+                  PopupMenuItem(
+                    child: Text('Asc'),
+                    value: Sort.asc,
+                  ),
+                  PopupMenuItem(
+                    child: Text('Desc'),
+                    value: Sort.desc,
+                  )
+                ];
+              })
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showContact,
@@ -61,8 +94,8 @@ class _HomeState extends State<Home> {
         child: Icon(Icons.add),
       ),
       body: ListView.builder(
-        itemCount: list.length,
-        itemBuilder: (context, index) => _buildCard(list[index]),
+        itemCount: _list.length,
+        itemBuilder: (context, index) => _buildCard(_list[index]),
       ),
     );
   }
@@ -156,7 +189,7 @@ class _HomeState extends State<Home> {
                     onPressed: () {
                       helper.deleteContact(contact.id);
                       setState(
-                          () => list.removeWhere((c) => c.id == contact.id));
+                          () => _list.removeWhere((c) => c.id == contact.id));
                       Navigator.pop(context);
                     },
                     child: Row(

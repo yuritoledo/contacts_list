@@ -14,7 +14,7 @@ class ContactForm extends StatefulWidget {
 }
 
 class _ContactFormState extends State<ContactForm> {
-  Contact contact;
+  Contact _contact;
   bool _isDirty = false;
 
   final _nameCtrl = TextEditingController();
@@ -26,14 +26,14 @@ class _ContactFormState extends State<ContactForm> {
     super.initState();
 
     if (widget.contact != null) {
-      contact = Contact.fromMap(widget.contact.toMap());
+      _contact = Contact.fromMap(widget.contact.toMap());
 
-      _nameCtrl.text = contact.name;
-      _emailCtrl.text = contact.email;
-      _phoneCtrl.text = contact.phone;
+      _nameCtrl.text = _contact.name;
+      _emailCtrl.text = _contact.email;
+      _phoneCtrl.text = _contact.phone;
     } else {
       setState(() {
-        contact = Contact();
+        _contact = Contact();
       });
     }
   }
@@ -98,19 +98,19 @@ class _ContactFormState extends State<ContactForm> {
             children: <Widget>[
               GestureDetector(
                 onTap: () async {
-                  final image =
-                      await ImagePicker.pickImage(source: ImageSource.camera);
+                  ImagePicker.pickImage(source: ImageSource.camera)
+                      .then((file) {
+                    if (file == null) return;
 
-                  if (image == null) return;
-
-                  setState(() {
-                    contact.img = image.path;
+                    setState(() {
+                      _contact.img = file.path;
+                    });
                   });
                 },
                 child: Image(
-                  image: contact.img == null
+                  image: _contact.img == null
                       ? AssetImage('images/avatar.png')
-                      : FileImage(File(contact.img)),
+                      : FileImage(File(_contact.img)),
                 ),
               ),
               Padding(
